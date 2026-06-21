@@ -4,13 +4,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>寒霜啟示錄 - 真正3D幾何與鏡頭跟隨版</title>
+<title>寒霜啟示錄 - 真正3D空間與鏡頭跟隨版</title>
 <style>
 body {
 margin: 0;
 padding: 0;
 overflow: hidden;
-background-color: #101725;
+background-color: #0f172a;
 font-family: 'Segoe UI', Arial, sans-serif;
 user-select: none;
 }
@@ -19,50 +19,46 @@ width: 100vw;
 height: 100vh;
 display: block;
 }
-/* 廣告風格頂部 UI */
+/* 廣告風格 2D UI 頂部面板 */
 .ui-container {
 position: absolute;
-top: 25px;
-right: 25px;
+top: 20px;
+left: 50%;
+transform: translateX(-50%);
 display: flex;
-flex-direction: column;
-gap: 10px;
+gap: 20px;
 z-index: 100;
 }
 .ui-box {
-background: rgba(15, 23, 42, 0.65);
-backdrop-filter: blur(8px);
-border: 2px solid rgba(255, 255, 255, 0.25);
-border-radius: 30px;
-padding: 8px 20px;
+background: rgba(15, 23, 42, 0.75);
+backdrop-filter: blur(10px);
+border: 2px solid rgba(255, 255, 255, 0.2);
+border-radius: 20px;
+padding: 8px 24px;
 display: flex;
 align-items: center;
-justify-content: space-between;
-min-width: 110px;
 color: white;
 font-weight: bold;
-font-size: 20px;
-box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+font-size: 18px;
+box-shadow: 0 10px 25px rgba(0,0,0,0.4);
 }
-.icon-cash { width: 24px; height: 14px; background: #22c55e; border: 2px solid white; border-radius: 3px; margin-right: 10px;}
-.icon-wood { width: 22px; height: 14px; background: #b45309; border-radius: 4px; margin-right: 10px;}
+.icon-cash { width: 20px; height: 12px; background: #22c55e; border: 2px solid white; border-radius: 2px; margin-right: 8px; }
+.icon-wood { width: 18px; height: 12px; background: #b45309; border-radius: 3px; margin-right: 8px; }
 
 .instruction {
 position: absolute;
-bottom: 30px;
+bottom: 25px;
 left: 50%;
 transform: translateX(-50%);
 background: rgba(15, 23, 42, 0.85);
 color: #93c5fd;
-padding: 12px 30px;
-border-radius: 40px;
-font-size: 16px;
-font-weight: bold;
-letter-spacing: 1px;
+padding: 10px 25px;
+border-radius: 30px;
+font-size: 14px;
+text-align: center;
 pointer-events: none;
-box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 border: 1px solid #334155;
-white-space: nowrap;
 z-index: 100;
 }
 </style>
@@ -71,308 +67,236 @@ z-index: 100;
 <body>
 
 <div class="ui-container">
-<div class="ui-box"><div class="icon-cash"></div>$<span id="val-money">0</span></div>
-<div class="ui-box"><div class="icon-wood"></div><span id="val-wood">0 / 15</span></div>
+<div class="ui-box"><div class="icon-cash"></div>美鈔: $<span id="val-money">0</span></div>
+<div class="ui-box"><div class="icon-wood"></div>木材: <span id="val-wood">0 / 15</span></div>
 </div>
 
-<div class="instruction">控制：長按 <b>W A S D</b> 或方向鍵移動，鏡頭與空間會實時跟隨你！</div>
+<div class="instruction">長按鍵盤 <b>W A S D</b> 或方向鍵移動，空間與 3D 鏡頭會完全跟隨小人轉動！</div>
 <div id="canvas-container"></div>
 
 <script>
-// --- 基礎 3D 場景設定 ---
+// --- 1. 建立真正 3D 場景與相機 ---
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(#eff6ff); // 雪地淺藍底色
-scene.fog = new THREE.FogExp2(#eff6ff, 0.015);
+scene.background = new THREE.Color('#e2eeff'); // 廣告雪地淺藍底色
+scene.fog = new THREE.FogExp2('#e2eeff', 0.015);
 
-// 攝影機：採用透視相機，營造前後空間感
+// 使用透視相機 (PerspectiveCamera) 產生真正的近大遠小立體空間感
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = true; // 開啟實體陰影
 container.appendChild(renderer.domElement);
 
-// --- 光影系統 ---
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+// --- 2. 光影系統 (有陰影才有立體感) ---
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 scene.add(ambientLight);
+
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-dirLight.position.set(40, 60, 20);
+dirLight.position.set(20, 40, 20);
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.width = 2048;
 dirLight.shadow.mapSize.height = 2048;
-dirLight.shadow.camera.near = 0.5;
-dirLight.shadow.camera.far = 200;
-const d = 50;
-dirLight.shadow.camera.left = -d;
-dirLight.shadow.camera.right = d;
-dirLight.shadow.camera.top = d;
-dirLight.shadow.camera.bottom = -d;
 scene.add(dirLight);
 
-// --- 遊戲核心數據 ---
+// --- 3. 遊戲數據狀態 ---
 let gameState = {
 money: 0,
 wood: 0,
 maxWood: 15,
-axePower: 1,
-speed: 0.25,
+speed: 0.2,
 pX: 0,
-pZ: 0
+pZ: 5
 };
 
-// --- 實體材質庫 ---
-const snowMat = new THREE.MeshLambertMaterial({ color: #e2eeff });
-const roadMat = new THREE.MeshLambertMaterial({ color: #e2955d }); // 廣告橘色道路
-const woodMat = new THREE.MeshLambertMaterial({ color: #d97706 });
-const leafMat = new THREE.MeshLambertMaterial({ color: #7cb3f5 });
-const leafTopMat = new THREE.MeshLambertMaterial({ color: #bfe3ff });
-const bearMat = new THREE.MeshLambertMaterial({ color: #ffffff });
-const cashMat = new THREE.MeshLambertMaterial({ color: #4ade80 });
-const tableMat = new THREE.MeshLambertMaterial({ color: #b45309 });
-const padMat = new THREE.MeshLambertMaterial({ color: #1e293b });
+// --- 4. 用 3D 幾何體現場建立物體 ---
 
-// --- 建立大地與廣告跑道 ---
-const floorGeo = new THREE.PlaneGeometry(300, 300);
-const floor = new THREE.Mesh(floorGeo, snowMat);
+// 建立 3D 大地
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: '#f0f6ff' }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-const roadGeo = new THREE.PlaneGeometry(300, 8);
-const road = new THREE.Mesh(roadGeo, roadMat);
+// 建立 3D 廣告黃土中央道路
+const road = new THREE.Mesh(new THREE.PlaneGeometry(200, 6), new THREE.MeshLambertMaterial({ color: '#e2955d' }));
 road.rotation.x = -Math.PI / 2;
-road.position.y = 0.01; // 微高於雪地防止閃爍
-road.position.z = 0;
+road.position.y = 0.01;
 road.receiveShadow = true;
 scene.add(road);
 
-// --- 3D 幾何模型創建函數 ---
-
-// 1. 幾何立體針葉樹
+// 3D 幾何樹木生成器 (用圓錐和圓柱疊出立體樹)
+let trees = [];
 function create3DTree(x, z) {
 const treeGroup = new THREE.Group();
-// 樹幹
-const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 2, 8);
-const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshLambertMaterial({color: #78350f}));
-trunk.position.y = 1;
+
+// 樹幹 (圓柱體)
+const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.5, 8), new THREE.MeshLambertMaterial({ color: '#78350f' }));
+trunk.position.y = 0.75;
 trunk.castShadow = true;
 treeGroup.add(trunk);
-// 三層幾何圓錐葉子
-const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.5, 3, 5), leafMat);
-c1.position.y = 3; c1.castShadow = true; treeGroup.add(c1);
-const c2 = new THREE.Mesh(new THREE.ConeGeometry(2.0, 2.5, 5), leafMat);
-c2.position.y = 4.5; c2.castShadow = true; treeGroup.add(c2);
-const c3 = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2, 5), leafTopMat);
-c3.position.y = 6; c3.castShadow = true; treeGroup.add(c3);
+
+// 三層樹葉 (圓錐體)
+const colors = ['#7cb3f5', '#93c5fd', '#bfdbfe'];
+for(let i = 0; i < 3; i++) {
+const leaf = new THREE.Mesh(new THREE.ConeGeometry(1.8 - i*0.4, 2, 6), new THREE.MeshLambertMaterial({ color: colors[i] }));
+leaf.position.y = 2 + i * 1.2;
+leaf.castShadow = true;
+treeGroup.add(leaf);
+}
 
 treeGroup.position.set(x, 0, z);
 scene.add(treeGroup);
-return { mesh: treeGroup, x: x, z: z, type: 'tree' };
+trees.push({ mesh: treeGroup, x: x, z: z });
 }
 
-// 2. 幾何立體方塊北極熊
-function create3DBear(x, z) {
-const bearGroup = new THREE.Group();
-// 身體
-const body = new THREE.Mesh(new THREE.BoxGeometry(2, 1.4, 3), bearMat);
-body.position.y = 1.1; body.castShadow = true; bearGroup.add(body);
-// 頭部
-const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 1.2), bearMat);
-head.position.set(0, 1.9, 1.4); head.castShadow = true; bearGroup.add(head);
-// 鼻子
-const snout = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.4), new THREE.MeshLambertMaterial({color: #e2e8f0}));
-snout.position.set(0, 1.8, 2.1); bearGroup.add(snout);
-// 四條腿
-for(let i=0; i<4; i++) {
-const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), bearMat);
-leg.position.set(i%2===0?0.7:-0.7, 0.3, i<2?1:-1);
-leg.castShadow = true; bearGroup.add(leg);
-}
-bearGroup.position.set(x, 0, z);
-scene.add(bearGroup);
-return { mesh: bearGroup, x: x, z: z, type: 'bear', animTime: Math.random()*10 };
+// 在上排種植一整排 3D 立體樹
+for(let i = -15; i <= 15; i += 5) {
+create3DTree(i, -8 + (Math.random() * 2 - 1));
 }
 
-// 場景物件陣列
-let interactables = [];
-// 初始化放置樹木與北極熊群
-interactables.push(create3DTree(-10, -12));
-interactables.push(create3DTree(-4, -15));
-interactables.push(create3DTree(6, -13));
-interactables.push(create3DTree(14, -16));
-
-interactables.push(create3DBear(-12, -5));
-interactables.push(create3DBear(12, -6));
-
-// 3. 卸貨木桌
-const table = new THREE.Mesh(new THREE.BoxGeometry(4, 1.2, 2), tableMat);
-table.position.set(-5, 0.6, 4);
-table.castShadow = true; table.receiveShadow = true;
+// 建立 3D 卸貨木桌 (位於道路下方)
+const table = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 2), new THREE.MeshLambertMaterial({ color: '#b45309' }));
+table.position.set(-4, 0.5, 5);
+table.castShadow = true;
+table.receiveShadow = true;
 scene.add(table);
 
-// 4. 工具升級地格
-const upgradePad = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 2.5), padMat);
-upgradePad.position.set(6, 0.05, 4);
-upgradePad.receiveShadow = true;
+// 建立 3D 升級格
+const upgradePad = new THREE.Mesh(new THREE.BoxGeometry(2, 0.05, 2), new THREE.MeshLambertMaterial({ color: '#334155' }));
+upgradePad.position.set(4, 0.02, 5);
 scene.add(upgradePad);
 
-// --- 主角建構 (純幾何藍色防寒服小人) ---
+// --- 5. 建立 3D 主角小人 (純幾何拼裝，無 Emoji) ---
 const playerGroup = new THREE.Group();
-const pBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.6, 0.9), new THREE.MeshLambertMaterial({color: #0284c7}));
-pBody.position.y = 1; pBody.castShadow = true; playerGroup.add(pBody);
-const pHood = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshLambertMaterial({color: #ffffff}));
-pHood.position.y = 2; pHood.castShadow = true; playerGroup.add(pHood);
-const pFace = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshLambertMaterial({color: #fed7aa}));
-pFace.position.set(0, 2, 0.2); playerGroup.add(pFace);
 
-// 主角手持武器 (3D 鶴嘴鋤)
-const toolGroup = new THREE.Group();
-const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5), new THREE.MeshLambertMaterial({color: #78350f}));
-shaft.rotation.x = Math.PI/2; toolGroup.add(shaft);
-const headGeo = new THREE.CylinderGeometry(0.06, 0.02, 0.8);
-const tHead = new THREE.Mesh(headGeo, new THREE.MeshLambertMaterial({color: #94a3b8}));
-tHead.position.z = 0.6; tHead.rotation.z = Math.PI/2; toolGroup.add(tHead);
-toolGroup.position.set(0.8, 1, 0.3);
-playerGroup.add(toolGroup);
+// 身體 (藍色防寒大衣方塊)
+const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.4, 0.8), new THREE.MeshLambertMaterial({ color: '#0284c7' }));
+body.position.y = 0.7;
+body.castShadow = true;
+playerGroup.add(body);
 
-// 背包容器：用來裝疊高的 3D 木頭
-const backpackGroup = new THREE.Group();
-backpackGroup.position.set(0, 0.6, -0.6); // 位於主角背後
-playerGroup.add(backpackGroup);
+// 頭部與兜帽 (白色帽子 + 膚色臉部球體)
+const hood = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshLambertMaterial({ color: '#ffffff' }));
+hood.position.y = 1.6;
+playerGroup.add(hood);
+const face = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), new THREE.MeshLambertMaterial({ color: '#fed7aa' }));
+face.position.set(0, 1.6, 0.2);
+playerGroup.add(face);
 
-playerGroup.position.set(0, 0, 8); // 起始位置
+// 手持 3D 採集斧頭
+const axeGroup = new THREE.Group();
+const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.2), new THREE.MeshLambertMaterial({ color: '#78350f' }));
+handle.rotation.x = Math.PI / 2;
+axeGroup.add(handle);
+const blade = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.4), new THREE.MeshLambertMaterial({ color: '#94a3b8' }));
+blade.position.z = 0.5;
+axeGroup.add(blade);
+axeGroup.position.set(0.6, 0.8, 0.2);
+playerGroup.add(axeGroup);
+
+// 背包掛載點：用來存放跟隨玩家背部疊高的木頭
+const backpack = new THREE.Group();
+backpack.position.set(0, 0.5, -0.5);
+playerGroup.add(backpack);
+
 scene.add(playerGroup);
 
-// --- 實體物件動態陣列 ---
+// --- 6. 掉落物與背包系統動態陣列 ---
 let backpackLogs = [];
 let sceneCashes = [];
-let tableLogCount = 0;
 
-// --- 鍵盤監聽 ---
+// 監聽鍵盤
 let keys = {};
 window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
 window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-// --- 工具計時器 ---
 let harvestTimer = 0;
 let unloadTimer = 0;
-let isMining = false;
 
-// --- 核心渲染與邏輯動態循環 ---
+// --- 7. 核心遊戲與 3D 空間移動循環 ---
 function animate() {
 requestAnimationFrame(animate);
 
-// 1. 玩家移動操作
+// 玩家控制移動
 let moved = false;
-let moveX = 0, moveZ = 0;
-
-if (keys['w'] || keys['arrowup']) { moveZ -= 1; moved = true; }
-if (keys['s'] || keys['arrowdown']) { moveZ += 1; moved = true; }
-if (keys['a'] || keys['arrowleft']) { moveX -= 1; moved = true; }
-if (keys['d'] || keys['arrowright']) { moveX += 1; moved = true; }
+let mx = 0, mz = 0;
+if (keys['w'] || keys['arrowup']) { mz -= 1; moved = true; }
+if (keys['s'] || keys['arrowdown']) { mz += 1; moved = true; }
+if (keys['a'] || keys['arrowleft']) { mx -= 1; moved = true; }
+if (keys['d'] || keys['arrowright']) { mx += 1; moved = true; }
 
 if (moved) {
-// 正規化移動向量，防斜走加速
-const length = Math.sqrt(moveX * moveX + moveZ * moveZ);
-gameState.pX += (moveX / length) * gameState.speed;
-gameState.pZ += (moveZ / length) * gameState.speed;
-
+let length = Math.sqrt(mx*mx + mz*mz);
+gameState.pX += (mx / length) * gameState.speed;
+gameState.pZ += (mz / length) * gameState.speed;
 playerGroup.position.set(gameState.pX, 0, gameState.pZ);
 
-// 讓角色面向移動的方向
-playerGroup.rotation.y = Math.atan2(moveX, moveZ);
-
-// 走路時身體微微搖晃
-pBody.rotation.z = Math.sin(Date.now() * 0.01) * 0.1;
-} else {
-pBody.rotation.z = 0;
+// 讓 3D 小人轉向移動方向
+playerGroup.rotation.y = Math.atan2(mx, mz);
+// 走路時身體微微搖擺
+body.rotation.z = Math.sin(Date.now() * 0.01) * 0.1;
 }
 
-// CRITICAL: 空間與鏡頭即時跟著人移動
-camera.position.set(playerGroup.position.x, playerGroup.position.y + 16, playerGroup.position.z + 16);
-camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z);
+// 核心焦點：讓 3D 空間相機永遠緊緊跟隨主角移動
+camera.position.set(playerGroup.position.x, playerGroup.position.y + 12, playerGroup.position.z + 12);
+camera.lookAt(playerGroup.position.x, playerGroup.position.y + 0.5, playerGroup.position.z);
 
-// 北極熊自主呼吸晃動
-interactables.forEach(obj => {
-if(obj.type === 'bear') {
-obj.animTime += 0.03;
-obj.mesh.rotation.y = Math.sin(obj.animTime * 0.5) * 0.3;
-obj.mesh.position.y = Math.abs(Math.sin(obj.animTime)) * 0.15;
-}
-});
+// 砍樹檢測
+let nearTree = false;
+trees.forEach(tree => {
+let dist = Math.sqrt(Math.pow(playerGroup.position.x - tree.x, 2) + Math.pow(playerGroup.position.z - tree.z, 2));
+if(dist < 2) {
+nearTree = true;
+// 斧頭揮動動畫
+axeGroup.rotation.x = Math.sin(Date.now() * 0.02) * 0.8;
 
-// 2. 碰撞與互動偵測
-isMining = false;
-interactables.forEach(obj => {
-let dist = Math.sqrt(Math.pow(playerGroup.position.x - obj.x, 2) + Math.pow(playerGroup.position.z - obj.z, 2));
-if (dist < 2.5) {
-isMining = true;
-// 觸發揮動斧頭工具動畫
-toolGroup.rotation.x = Math.sin(Date.now() * 0.02) * 0.8;
-
-if (Date.now() - harvestTimer > 300) {
+if (Date.now() - harvestTimer > 250) {
 if (gameState.wood < gameState.maxWood) {
-gameState.wood += gameState.axePower;
-if (gameState.wood > gameState.maxWood) gameState.wood = gameState.maxWood;
-
-// 受擊幾何晃動反饋
-obj.mesh.scale.set(1.2, 0.8, 1.2);
-setTimeout(() => obj.mesh.scale.set(1,1,1), 100);
-
+gameState.wood++;
 updateBackpack3D();
 }
 harvestTimer = Date.now();
 }
 }
 });
+if(!nearTree) axeGroup.rotation.x = 0;
 
-if(!isMining) {
-toolGroup.rotation.x = 0; // 靜止時回復原位
-}
-
-// 3. 走近木桌自動卸貨 (桌子坐標: -5, 4)
-let distToTable = Math.sqrt(Math.pow(playerGroup.position.x - (-5), 2) + Math.pow(playerGroup.position.z - 4, 2));
-if (distToTable < 2.5 && gameState.wood > 0) {
+// 走到木桌旁 (-4, 5) 卸貨
+let distToTable = Math.sqrt(Math.pow(playerGroup.position.x - (-4), 2) + Math.pow(playerGroup.position.z - 5, 2));
+if(distToTable < 2 && gameState.wood > 0) {
 if (Date.now() - unloadTimer > 150) {
 gameState.wood--;
 updateBackpack3D();
 
-// 在桌面上堆疊小型 3D 木材
-const tableLog = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.8, 8), woodMat);
-tableLog.rotation.z = Math.PI / 2;
-tableLog.position.set(-5 + (Math.random()*1.2 - 0.6), 1.3 + (tableLogCount * 0.12), 4 + (Math.random()*0.6 - 0.3));
-scene.add(tableLog);
-tableLogCount++;
+// 桌上生成卸下的 3D 木頭
+const tLog = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.8, 8), new THREE.MeshLambertMaterial({ color: '#d97706' }));
+tLog.rotation.z = Math.PI / 2;
+tLog.position.set(-4 + (Math.random()*1 - 0.5), 1.1, 5 + (Math.random()*0.6 - 0.3));
+scene.add(tLog);
+setTimeout(() => scene.remove(tLog), 2000); // 兩秒後自動清理
 
-// 廣告精髓：拋物線噴射 3D 現金方塊
+// 物理噴發立體 3D 美鈔方塊
 spawn3DCash();
-
 unloadTimer = Date.now();
-
-// 桌上積木太多時自動清理釋放內存
-if(tableLogCount > 20) {
-setTimeout(() => { scene.remove(tableLog); }, 1500);
-}
 }
 }
 
-// 4. 地面 3D 現金物理吸附與收集
+// 處理地面 3D 鈔票物理動態與吸取
 for (let i = sceneCashes.length - 1; i >= 0; i--) {
 let cash = sceneCashes[i];
-
-// 如果現金還在噴射動畫中
-if(cash.flyTicks > 0) {
-cash.mesh.position.x += cash.vX;
-cash.mesh.position.y += cash.vY;
-cash.mesh.position.z += cash.vZ;
-cash.vY -= 0.015; // 模擬重力
-if(cash.mesh.position.y < 0.15) { cash.mesh.position.y = 0.15; cash.flyTicks = 0; }
-cash.flyTicks--;
+if (cash.ticks > 0) {
+// 模擬剛噴出來時的拋物線跳躍
+cash.mesh.position.x += cash.vx;
+cash.mesh.position.y += cash.vy;
+cash.mesh.position.z += cash.vz;
+cash.vy -= 0.015; // 重力加速度
+if (cash.mesh.position.y < 0.1) { cash.mesh.position.y = 0.1; cash.ticks = 0; }
+cash.ticks--;
 } else {
-// 落地後，檢測玩家是否走近吸取
+// 落地後檢測吸附
 let distToCash = Math.sqrt(Math.pow(playerGroup.position.x - cash.mesh.position.x, 2) + Math.pow(playerGroup.position.z - cash.mesh.position.z, 2));
-if(distToCash < 2.0) {
-gameState.money += 15;
+if (distToCash < 1.5) {
+gameState.money += 10;
 document.getElementById('val-money').innerText = gameState.money;
 scene.remove(cash.mesh);
 sceneCashes.splice(i, 1);
@@ -380,71 +304,48 @@ sceneCashes.splice(i, 1);
 }
 }
 
-// 5. 工具升級地格踩踏檢測 (格子坐標: 6, 4)
-let distToPad = Math.sqrt(Math.pow(playerGroup.position.x - 6, 2) + Math.pow(playerGroup.position.z - 4, 2));
-if (distToPad < 1.8) {
-if (gameState.money >= 30) {
-gameState.money -= 30;
-gameState.axePower += 1;
-document.getElementById('val-money').innerText = gameState.money;
-
-// 地格閃爍綠色視覺回饋
-upgradePad.material = new THREE.MeshLambertMaterial({color: #22c55e});
-setTimeout(() => upgradePad.material = padMat, 300);
-playerGroup.position.z += 1.5; // 略微彈開玩家防止連續觸發
-gameState.pZ += 1.5;
-}
-}
-
 renderer.render(scene, camera);
 }
 
-// --- 核心演算法：在背上實體堆疊 3D 圓柱木材 ---
+// 核心算法：在背上將 3D 圓柱體木頭實時往上疊高
 function updateBackpack3D() {
-// 先清除之前的背部木頭模型
-backpackLogs.forEach(log => backpackGroup.remove(log));
+backpackLogs.forEach(log => backpack.remove(log));
 backpackLogs = [];
 
-// 重新依據當前數量向上累積堆疊
 for (let i = 0; i < gameState.wood; i++) {
-const logGeo = new THREE.CylinderGeometry(0.16, 0.16, 1.1, 8);
-const logMesh = new THREE.Mesh(logGeo, woodMat);
+const logMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.9, 8), new THREE.MeshLambertMaterial({ color: '#d97706' }));
 logMesh.rotation.z = Math.PI / 2; // 橫放
-logMesh.position.y = i * 0.22; // 層層往上疊高
+logMesh.position.y = i * 0.18; // 依據數量一層層往上加高
 logMesh.castShadow = true;
-backpackGroup.add(logMesh);
+backpack.add(logMesh);
 backpackLogs.push(logMesh);
 }
-
 document.getElementById('val-wood').innerText = `${gameState.wood} / ${gameState.maxWood}`;
 }
 
-// --- 核心演算法：拋物線噴發立體美鈔方塊 ---
+// 核心算法：噴發真正的 3D 方塊美鈔
 function spawn3DCash() {
-const cashGeo = new THREE.BoxGeometry(0.7, 0.15, 0.4);
-const cashMesh = new THREE.Mesh(cashGeo, cashMat);
-cashMesh.position.set(-5, 1.2, 4);
-cashMesh.castShadow = true;
+const cashMesh = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.3), new THREE.MeshLambertMaterial({ color: '#4ade80' }));
+cashMesh.position.set(-4, 1, 5);
 scene.add(cashMesh);
 
-// 隨機賦予初速度向量，形成向四周噴散的唯美弧線
 sceneCashes.push({
 mesh: cashMesh,
-vX: (Math.random() * 0.15 - 0.05),
-vY: (Math.random() * 0.2 + 0.15),
-vZ: (Math.random() * 0.15 + 0.05),
-flyTicks: 40
+vx: (Math.random() * 0.12 - 0.04),
+vy: (Math.random() * 0.15 + 0.1),
+vz: (Math.random() * 0.12 + 0.02),
+ticks: 35
 });
 }
 
-// 視窗大小自適應
+// 視窗自適應縮放
 window.addEventListener('resize', () => {
 camera.aspect = window.innerWidth / window.innerHeight;
 camera.updateProjectionMatrix();
 renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// 啟動 3D 渲染主體
+// 啟動 3D 世界
 animate();
 </script>
 </body>
