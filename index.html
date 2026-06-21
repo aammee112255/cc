@@ -1,219 +1,274 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>極寒サバイバル！数字を増やして北極熊を倒せ</title>
+    <title>寒霜啟示錄-廣告極速版</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom, #e0f2fe, #7dd3fc);
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e6f2ff;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        h1 {
-            color: #0369a1;
-            margin-bottom: 5px;
-            text-shadow: 1px 1px 2px white;
-        }
-
-        #subtitle {
-            color: #0c4a6e;
-            margin-top: 0;
-            font-weight: bold;
-        }
-
-        #game-container {
-            position: relative;
-            width: 400px;
-            height: 550px;
-            background: rgba(255, 255, 255, 0.6);
-            border: 4px solid #0284c7;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-
-        /* キャラクター共通スタイル */
-        .character {
-            position: absolute;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            cursor: pointer;
+            height: 100vh;
+            margin: 0;
         }
-
-        /* レベルバッジ */
-        .level-badge {
-            background-color: #ef4444;
+        #game-container {
+            width: 480px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 4px solid #b3d7ff;
+        }
+        .header {
+            background: #2b5c8f;
             color: white;
-            font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        /* プレイヤー固有 */
-        #player .level-badge {
-            background-color: #3b82f6; /* プレイヤーは青 */
-        }
-
-        .sprite {
-            font-size: 45px;
-            user-select: none;
-        }
-
-        /* メッセージ表示 */
-        #message {
-            position: absolute;
-            top: 20px;
-            width: 100%;
+            padding: 15px;
             text-align: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            color: #1e3a8a;
-            pointer-events: none;
-            z-index: 10;
         }
-
-        /* リスタートボタン */
-        #restart-btn {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 12px 24px;
-            font-size: 18px;
-            background-color: #10b981;
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            background: #f0f7ff;
+            padding: 10px;
+            border-bottom: 2px solid #b3d7ff;
+            font-weight: bold;
+        }
+        .house-panel {
+            text-align: center;
+            padding: 15px;
+            background: #eef5fc;
+        }
+        #house-display {
+            font-size: 40px;
+            margin: 10px 0;
+        }
+        .upgrade-btn {
+            background: #ff9800;
             color: white;
             border: none;
-            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 20;
         }
-
-        #restart-btn:hover {
-            background-color: #059669;
+        .upgrade-btn:hover { background: #e68a00; }
+        .upgrade-btn:disabled { background: #cccccc; cursor: not-allowed; }
+        
+        .action-zone {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
         }
+        .action-card {
+            width: 45%;
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #cedede;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            user-select: none;
+        }
+        .action-card:active { transform: scale(0.95); }
+        .wood-card { background: #e2f0d9; border-color: #a9d18e; }
+        .bear-card { background: #fff2cc; border-color: #ffd966; }
+        .card-icon { font-size: 45px; margin-bottom: 5px; }
+        
+        .market-zone {
+            padding: 15px;
+            background: #f9f9f9;
+            border-top: 2px solid #eee;
+        }
+        .customer-queue {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            min-height: 50px;
+        }
+        .customer {
+            font-size: 30px;
+            margin-right: 15px;
+            position: relative;
+        }
+        .demand-bubble {
+            background: #333;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .sell-btn {
+            margin-left: auto;
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .sell-btn:hover { background: #45a049; }
+        .sell-btn:disabled { background: #cccccc; }
     </style>
 </head>
 <body>
 
-    <h1>寒霜啓示録風ミニゲーム</h1>
-    <p id="subtitle">自分よりレベルの低い熊（🐻‍❄️）をタップして倒せ！</p>
-
-    <div id="game-container">
-        <div id="message"></div>
-        <button id="restart-btn" onclick="initGame()">もう一度挑戦</button>
-        
-        <div id="player" class="character">
-            <div class="level-badge" id="player-level">LV 5</div>
-            <div class="sprite">🥶</div>
-        </div>
-
-        <div id="enemies-layer"></div>
+<div id="game-container">
+    <div class="header">❄️ 寒霜啟示錄 - 廣告模擬器 ❄️</div>
+    
+    <div class="dashboard">
+        <div>💰 金幣: $<span id="money">0</span></div>
+        <div>🪵 木材: <span id="wood">0</span></div>
+        <div>🥩 熊肉: <span id="meat">0</span></div>
     </div>
+    
+    <div class="house-panel">
+        <div id="house-level">當前住所：破爛小木屋 (Lv.1)</div>
+        <div id="house-display">🏚️</div>
+        <button id="upgrade-btn" class="upgrade-btn" onclick="upgradeHouse()">升級房子 (需要 $50)</button>
+    </div>
+    
+    <div class="action-zone">
+        <div class="action-card wood-card" onclick="gather('wood')">
+            <div class="card-icon">🌲</div>
+            <strong>砍伐木材</strong>
+            <div style="font-size: 12px; color: #666; margin-top:5px;">點擊 +1 木材</div>
+        </div>
+        <div class="action-card bear-card" onclick="gather('meat')">
+            <div class="card-icon">🐻‍❄️</div>
+            <strong>狩獵北極熊</strong>
+            <div style="font-size: 12px; color: #666; margin-top:5px;">點擊 +1 熊肉</div>
+        </div>
+    </div>
+    
+    <div class="market-zone">
+        <div style="font-weight: bold; margin-bottom: 8px; color: #555;">排隊買物資的倖存者：</div>
+        <div class="customer-queue">
+            <div id="customer-icon" class="customer">🧍</div>
+            <div id="demand-text" class="demand-bubble">我要 3 個木材</div>
+            <button id="sell-btn" class="sell-btn" onclick="sellItems()">賣給他！</button>
+        </div>
+    </div>
+</div>
 
 <script>
-    let playerLevel = 5;
-    const initialPlayerLevel = 5;
-    const gameContainer = document.getElementById('game-container');
-    const playerEl = document.getElementById('player');
-    const playerLevelEl = document.getElementById('player-level');
-    const enemiesLayer = document.getElementById('enemies-layer');
-    const messageEl = document.getElementById('message');
-    const restartBtn = document.getElementById('restart-btn');
+    // 遊戲數據
+    let gameState = {
+        money: 0,
+        wood: 0,
+        meat: 0,
+        houseLevel: 1,
+        upgradeCost: 50
+    };
 
-    // 敵データ（初期位置とレベルの倍率）
-    const enemyConfig = [
-        { id: 1, x: 50,  y: 100, levelOffset: -3, sprite: '🐻‍❄️' },  // 弱い熊
-        { id: 2, x: 280, y: 120, levelOffset: 2,  sprite: '🐻‍❄️' },  // ちょっと強い熊
-        { id: 3, x: 80,  y: 280, levelOffset: 8,  sprite: '🐻‍❄️' },  // 強い熊
-        { id: 4, x: 260, y: 320, levelOffset: 18, sprite: '👑' },   // ボス（氷の王冠）
+    // 客人需求狀態
+    let currentDemand = {
+        type: 'wood', // wood 或 meat
+        amount: 3,
+        reward: 15
+    };
+
+    const houseStages = [
+        { lvl: 1, name: "破爛小木屋", icon: "🏚️", cost: 50 },
+        { lvl: 2, name: "溫馨磚瓦房", icon: "🏡", cost: 150 },
+        { lvl: 3, name: "高級雙層別墅", icon: "🏠", cost: 400 },
+        { lvl: 4, name: "豪華防寒城堡", icon: "🏰", cost: "已滿級" }
     ];
 
-    function initGame() {
-        // 初期化
-        playerLevel = initialPlayerLevel;
-        updatePlayer();
-        playerEl.style.left = '170px';
-        playerEl.style.top = '440px';
-        playerEl.style.display = 'flex';
+    const customerIcons = ["🧍", "🏃", "🧔", "👩", "👵", "🤠"];
+
+    // 更新畫面
+    function updateUI() {
+        document.getElementById('money').innerText = gameState.money;
+        document.getElementById('wood').innerText = gameState.wood;
+        document.getElementById('meat').innerText = gameState.meat;
         
-        messageEl.innerText = 'ターゲットを選べ！';
-        restartBtn.style.display = 'none';
-        enemiesLayer.innerHTML = '';
-
-        // 敵の生成
-        enemyConfig.forEach(conf => {
-            const enemy = document.createElement('div');
-            enemy.className = 'character enemy';
-            enemy.style.left = conf.x + 'px';
-            enemy.style.top = conf.y + 'px';
-            
-            // 広告っぽく、プレイヤーの初期レベルを基準に手頃な強さを設定
-            const targetLevel = initialPlayerLevel + conf.levelOffset;
-
-            enemy.innerHTML = `
-                <div class="level-badge">LV ${targetLevel}</div>
-                <div class="sprite">${conf.sprite}</div>
-            `;
-
-            // クリックイベント
-            enemy.onclick = () => attackEnemy(enemy, targetLevel);
-            enemiesLayer.appendChild(enemy);
-        });
-    }
-
-    function updatePlayer() {
-        playerLevelEl.innerText = `LV ${playerLevel}`;
-    }
-
-    function attackEnemy(enemyEl, enemyLevel) {
-        if (playerLevel > enemyLevel) {
-            // 勝利：プレイヤーが移動して敵を吸収
-            playerEl.style.left = enemyEl.style.left;
-            playerEl.style.top = enemyEl.style.top;
-            
-            // レベルアップ！
-            playerLevel += enemyLevel;
-            updatePlayer();
-            
-            // 敵を消去
-            enemyEl.remove();
-            messageEl.innerText = '撃破！レベルアップ！';
-
-            // クリア判定（敵が全滅したか）
-            setTimeout(() => {
-                if (document.querySelectorAll('.enemy').length === 0) {
-                    messageEl.innerText = '🎉 ステージクリア！ 🎉';
-                    restartBtn.style.display = 'block';
-                }
-            }, 300);
-
+        // 更新房子
+        let stage = houseStages[Math.min(gameState.houseLevel - 1, houseStages.length - 1)];
+        document.getElementById('house-level').innerText = `當前住所：${stage.name} (Lv.${gameState.houseLevel})`;
+        document.getElementById('house-display').innerText = stage.icon;
+        
+        // 更新升級按鈕
+        let upgradeBtn = document.getElementById('upgrade-btn');
+        if (gameState.houseLevel >= houseStages.length) {
+            upgradeBtn.innerText = "已升級至最高規格！";
+            upgradeBtn.disabled = true;
         } else {
-            // 敗北：広告でよく見るお約束のゲームオーバー
-            messageEl.innerText = '❌ 失敗！熊に負けました…';
-            playerEl.style.display = 'none';
-            restartBtn.style.display = 'block';
+            let nextStage = houseStages[gameState.houseLevel - 1];
+            upgradeBtn.innerText = `升級房子 (需要 $${nextStage.cost})`;
+            upgradeBtn.disabled = gameState.money < nextStage.cost;
+        }
+
+        // 更新交易按鈕狀態
+        let sellBtn = document.getElementById('sell-btn');
+        if (currentDemand.type === 'wood') {
+            sellBtn.disabled = gameState.wood < currentDemand.amount;
+        } else {
+            sellBtn.disabled = gameState.meat < currentDemand.amount;
         }
     }
 
-    // ゲーム開始
-    initGame();
+    // 收集資源 (砍樹或打熊)
+    function gather(type) {
+        if (type === 'wood') {
+            gameState.wood += 1;
+        } else if (type === 'meat') {
+            gameState.meat += 1;
+        }
+        updateUI();
+    }
+
+    // 生成新客人需求
+    function generateCustomer() {
+        const types = ['wood', 'meat'];
+        currentDemand.type = types[Math.floor(Math.random() * types.length)];
+        currentDemand.amount = Math.floor(Math.random() * 5) + 2; // 2~6個
+        
+        let typeName = currentDemand.type === 'wood' ? '🪵 木材' : '🥩 熊肉';
+        currentDemand.reward = currentDemand.amount * (currentDemand.type === 'wood' ? 5 : 8); // 熊肉比較貴
+        
+        document.getElementById('demand-text').innerText = `我要 ${currentDemand.amount} 個${typeName} (付 $${currentDemand.reward})`;
+        document.getElementById('customer-icon').innerText = customerIcons[Math.floor(Math.random() * customerIcons.length)];
+        
+        updateUI();
+    }
+
+    // 賣出東西
+    function sellItems() {
+        if (currentDemand.type === 'wood' && gameState.wood >= currentDemand.amount) {
+            gameState.wood -= currentDemand.amount;
+            gameState.money += currentDemand.reward;
+            generateCustomer();
+        } else if (currentDemand.type === 'meat' && gameState.meat >= currentDemand.amount) {
+            gameState.meat -= currentDemand.amount;
+            gameState.money += currentDemand.reward;
+            generateCustomer();
+        }
+    }
+
+    // 升級房子
+    function upgradeHouse() {
+        let currentCost = houseStages[gameState.houseLevel - 1].cost;
+        if (gameState.money >= currentCost && gameState.houseLevel < houseStages.length) {
+            gameState.money -= currentCost;
+            gameState.houseLevel += 1;
+            alert("🎉 恭喜！房子升級了！");
+            updateUI();
+        }
+    }
+
+    // 初始化遊戲
+    generateCustomer();
 </script>
 
 </body>
