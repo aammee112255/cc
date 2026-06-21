@@ -1,275 +1,397 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>寒霜啟示錄-廣告極速版</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #e6f2ff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        #game-container {
-            width: 480px;
-            background: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            overflow: hidden;
-            border: 4px solid #b3d7ff;
-        }
-        .header {
-            background: #2b5c8f;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .dashboard {
-            display: flex;
-            justify-content: space-around;
-            background: #f0f7ff;
-            padding: 10px;
-            border-bottom: 2px solid #b3d7ff;
-            font-weight: bold;
-        }
-        .house-panel {
-            text-align: center;
-            padding: 15px;
-            background: #eef5fc;
-        }
-        #house-display {
-            font-size: 40px;
-            margin: 10px 0;
-        }
-        .upgrade-btn {
-            background: #ff9800;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .upgrade-btn:hover { background: #e68a00; }
-        .upgrade-btn:disabled { background: #cccccc; cursor: not-allowed; }
-        
-        .action-zone {
-            display: flex;
-            justify-content: space-around;
-            padding: 20px;
-        }
-        .action-card {
-            width: 45%;
-            text-align: center;
-            padding: 15px;
-            border: 2px solid #cedede;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            user-select: none;
-        }
-        .action-card:active { transform: scale(0.95); }
-        .wood-card { background: #e2f0d9; border-color: #a9d18e; }
-        .bear-card { background: #fff2cc; border-color: #ffd966; }
-        .card-icon { font-size: 45px; margin-bottom: 5px; }
-        
-        .market-zone {
-            padding: 15px;
-            background: #f9f9f9;
-            border-top: 2px solid #eee;
-        }
-        .customer-queue {
-            display: flex;
-            align-items: center;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            min-height: 50px;
-        }
-        .customer {
-            font-size: 30px;
-            margin-right: 15px;
-            position: relative;
-        }
-        .demand-bubble {
-            background: #333;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-        .sell-btn {
-            margin-left: auto;
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .sell-btn:hover { background: #45a049; }
-        .sell-btn:disabled { background: #cccccc; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>寒霜啟示錄 - 偽3D立體極速版</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background: #cbdcf0;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+overflow: hidden;
+perspective: 1000px; /* 啟動全景 3D 視角 */
+}
+#game-container {
+width: 700px;
+background: #ffffff;
+border-radius: 15px;
+box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+overflow: hidden;
+border: 4px solid #99c2ed;
+user-select: none;
+}
+.header {
+background: #2b5c8f;
+color: white;
+padding: 12px;
+text-align: center;
+font-size: 18px;
+font-weight: bold;
+}
+.dashboard {
+display: flex;
+justify-content: space-around;
+background: #f0f7ff;
+padding: 10px;
+border-bottom: 2px solid #b3d7ff;
+font-weight: bold;
+font-size: 16px;
+z-index: 20;
+position: relative;
+}
+/* 3D 遊戲舞台 */
+#view-wrapper {
+width: 700px;
+height: 480px;
+background: #eef5fc;
+overflow: hidden;
+position: relative;
+}
+#map {
+width: 700px;
+height: 480px;
+position: absolute;
+transform: rotateX(30deg) rotateY(0deg); /* 傾斜地圖製造立體感 */
+transform-style: preserve-3d;
+background-image: radial-gradient(#d3e5f7 20%, transparent 20%);
+background-size: 30px 30px;
+}
+/* 基礎 3D 物件 */
+.game-obj-3d {
+position: absolute;
+width: 60px;
+height: 60px;
+transform-style: preserve-3d;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+/* --- 立體樹構造 --- */
+.3d-tree {
+transform: translateZ(0px);
+}
+.tree-layer {
+position: absolute;
+font-size: 55px;
+text-shadow: 0 5px 10px rgba(0,0,0,0.15);
+}
+/* 利用 Z 軸堆疊出立體厚度 */
+.tl-1 { transform: translateZ(0px) scale(1); }
+.tl-2 { transform: translateZ(15px) scale(0.85); color: #2e6930; }
+.tl-3 { transform: translateZ(30px) scale(0.7); color: #3d8c40; }
+
+/* --- 立體北極熊構造 --- */
+.3d-bear {
+animation: bearWobble 2s infinite ease-in-out;
+}
+.bear-layer {
+position: absolute;
+font-size: 55px;
+}
+.bl-shadow { transform: translateZ(0px) scale(1); filter: brightness(0) opacity(0.15); blur: 2px; top: 5px; }
+.bl-body { transform: translateZ(10px); }
+.bl-head { transform: translateZ(25px) scale(0.9); }
+
+/* 浮空提示文字 */
+.bubble {
+position: absolute;
+background: rgba(0,0,0,0.75);
+color: white;
+padding: 4px 8px;
+border-radius: 5px;
+font-size: 11px;
+white-space: nowrap;
+transform: rotateX(-30deg) translateZ(50px); /* 讓文字面板立起來面向玩家 */
+top: -40px;
+pointer-events: none;
+}
+
+/* 主角與斧頭 */
+#player {
+transition: all 0.05s linear;
+transform-style: preserve-3d;
+}
+.player-body {
+font-size: 45px;
+transform: translateZ(15px);
+}
+.axe-hand {
+position: absolute;
+font-size: 24px;
+right: -15px;
+top: -5px;
+transform: translateZ(20px) rotate(0deg);
+transition: transform 0.1s;
+}
+.swing {
+transform: translateZ(20px) rotate(-70deg) !important;
+}
+
+/* 靜態普通建築 */
+.flat-style {
+font-size: 60px;
+transform: translateZ(10px);
+}
+
+@keyframes bearWobble {
+0%, 100% { transform: rotateZ(-5deg); }
+50% { transform: rotateZ(5deg); }
+}
+
+.control-tip {
+background: #333;
+color: #fff;
+text-align: center;
+padding: 8px;
+font-size: 13px;
+position: relative;
+z-index: 20;
+}
+</style>
 </head>
 <body>
 
 <div id="game-container">
-    <div class="header">❄️ 寒霜啟示錄 - 廣告模擬器 ❄️</div>
-    
-    <div class="dashboard">
-        <div>💰 金幣: $<span id="money">0</span></div>
-        <div>🪵 木材: <span id="wood">0</span></div>
-        <div>🥩 熊肉: <span id="meat">0</span></div>
-    </div>
-    
-    <div class="house-panel">
-        <div id="house-level">當前住所：破爛小木屋 (Lv.1)</div>
-        <div id="house-display">🏚️</div>
-        <button id="upgrade-btn" class="upgrade-btn" onclick="upgradeHouse()">升級房子 (需要 $50)</button>
-    </div>
-    
-    <div class="action-zone">
-        <div class="action-card wood-card" onclick="gather('wood')">
-            <div class="card-icon">🌲</div>
-            <strong>砍伐木材</strong>
-            <div style="font-size: 12px; color: #666; margin-top:5px;">點擊 +1 木材</div>
-        </div>
-        <div class="action-card bear-card" onclick="gather('meat')">
-            <div class="card-icon">🐻‍❄️</div>
-            <strong>狩獵北極熊</strong>
-            <div style="font-size: 12px; color: #666; margin-top:5px;">點擊 +1 熊肉</div>
-        </div>
-    </div>
-    
-    <div class="market-zone">
-        <div style="font-weight: bold; margin-bottom: 8px; color: #555;">排隊買物資的倖存者：</div>
-        <div class="customer-queue">
-            <div id="customer-icon" class="customer">🧍</div>
-            <div id="demand-text" class="demand-bubble">我要 3 個木材</div>
-            <button id="sell-btn" class="sell-btn" onclick="sellItems()">賣給他！</button>
-        </div>
-    </div>
+<div class="header">❄️ 寒霜啟示錄 - 3D立體視覺版 ❄️</div>
+
+<div class="dashboard">
+<div>💰 金幣: $<span id="money">0</span></div>
+<div>🪵 木材: <span id="wood">0</span></div>
+<div>🥩 熊肉: <span id="meat">0</span></div>
+<div>🪓 效率: <span id="axe-efficiency">每擊 +1</span></div>
+</div>
+
+<div id="view-wrapper">
+<div id="map">
+
+<div id="house" class="game-obj-3d flat-style" style="left: 50px; top: 40px;">
+🏚️
+<div id="house-tip" class="bubble">升級需 $50</div>
+</div>
+
+<div id="forge" class="game-obj-3d flat-style" style="left: 320px; top: 40px;">
+⚒️
+<div id="forge-tip" class="bubble">升級斧頭: $30</div>
+</div>
+
+<div id="customer" class="game-obj-3d flat-style" style="left: 50px; top: 340px;">
+🧍
+<div id="customer-tip" class="bubble">載入中...</div>
+</div>
+
+<div id="tree" class="game-obj-3d 3d-tree" style="left: 560px; top: 60px;">
+<div class="tree-layer tl-1">🌲</div>
+<div class="tree-layer tl-2">🌲</div>
+<div class="tree-layer tl-3">🌲</div>
+<div class="bubble">碰我砍樹</div>
+</div>
+
+<div id="bear" class="game-obj-3d 3d-bear" style="left: 560px; top: 320px;">
+<div class="bear-layer bl-shadow">🐻‍❄️</div>
+<div class="bear-layer bl-body">🐻‍❄️</div>
+<div class="bear-layer bl-head">🐻‍❄️</div>
+<div class="bubble">碰我打熊</div>
+</div>
+
+<div id="player" class="game-obj-3d" style="left: 320px; top: 220px;">
+<div class="player-body">🕴️</div>
+<span id="axe-icon" class="axe-hand">🪓</span>
+</div>
+
+</div>
+</div>
+
+<div class="control-tip">操作：按 <b>WASD</b> 移動。地圖加入了立體傾斜、樹木和北極熊皆升級為多層次 3D 模型！</div>
 </div>
 
 <script>
-    // 遊戲數據
-    let gameState = {
-        money: 0,
-        wood: 0,
-        meat: 0,
-        houseLevel: 1,
-        upgradeCost: 50
-    };
+// 遊戲數據與邏輯 (延續上一版本並完美適應3D坐標)
+let gameState = {
+money: 0,
+wood: 0,
+meat: 0,
+houseLevel: 1,
+axeLevel: 1,
+playerX: 320,
+playerY: 220,
+speed: 12
+};
 
-    // 客人需求狀態
-    let currentDemand = {
-        type: 'wood', // wood 或 meat
-        amount: 3,
-        reward: 15
-    };
+const axeStages = [
+{ lvl: 1, name: "石製手斧", cost: 30, power: 1 },
+{ lvl: 2, name: "鐵製伐木斧", cost: 100, power: 2 },
+{ lvl: 3, name: "鋼製雙面斧", cost: 250, power: 4 },
+{ lvl: 4, name: "黃金開山神斧", cost: 600, power: 8 },
+{ lvl: 5, name: "極光終極神斧", cost: 0, power: 15 }
+];
 
-    const houseStages = [
-        { lvl: 1, name: "破爛小木屋", icon: "🏚️", cost: 50 },
-        { lvl: 2, name: "溫馨磚瓦房", icon: "🏡", cost: 150 },
-        { lvl: 3, name: "高級雙層別墅", icon: "🏠", cost: 400 },
-        { lvl: 4, name: "豪華防寒城堡", icon: "🏰", cost: "已滿級" }
-    ];
+const houseStages = [
+{ lvl: 1, name: "破爛小木屋", icon: "🏚️", cost: 50 },
+{ lvl: 2, name: "溫馨磚瓦房", icon: "🏡", cost: 150 },
+{ lvl: 3, name: "高級雙層別墅", icon: "🏠", cost: 400 },
+{ lvl: 4, name: "豪華防寒城堡", icon: "🏰", cost: 0 }
+];
 
-    const customerIcons = ["🧍", "🏃", "🧔", "👩", "👵", "🤠"];
+let currentDemand = { type: 'wood', amount: 3, reward: 15 };
+const customerIcons = ["🧍", "🏃", "🧔", "👩", "🤠"];
 
-    // 更新畫面
-    function updateUI() {
-        document.getElementById('money').innerText = gameState.money;
-        document.getElementById('wood').innerText = gameState.wood;
-        document.getElementById('meat').innerText = gameState.meat;
-        
-        // 更新房子
-        let stage = houseStages[Math.min(gameState.houseLevel - 1, houseStages.length - 1)];
-        document.getElementById('house-level').innerText = `當前住所：${stage.name} (Lv.${gameState.houseLevel})`;
-        document.getElementById('house-display').innerText = stage.icon;
-        
-        // 更新升級按鈕
-        let upgradeBtn = document.getElementById('upgrade-btn');
-        if (gameState.houseLevel >= houseStages.length) {
-            upgradeBtn.innerText = "已升級至最高規格！";
-            upgradeBtn.disabled = true;
-        } else {
-            let nextStage = houseStages[gameState.houseLevel - 1];
-            upgradeBtn.innerText = `升級房子 (需要 $${nextStage.cost})`;
-            upgradeBtn.disabled = gameState.money < nextStage.cost;
-        }
+const player = document.getElementById('player');
+const axeIcon = document.getElementById('axe-icon');
+let keysPressed = {};
 
-        // 更新交易按鈕狀態
-        let sellBtn = document.getElementById('sell-btn');
-        if (currentDemand.type === 'wood') {
-            sellBtn.disabled = gameState.wood < currentDemand.amount;
-        } else {
-            sellBtn.disabled = gameState.meat < currentDemand.amount;
-        }
-    }
+window.addEventListener('keydown', (e) => { keysPressed[e.key.toLowerCase()] = true; });
+window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
 
-    // 收集資源 (砍樹或打熊)
-    function gather(type) {
-        if (type === 'wood') {
-            gameState.wood += 1;
-        } else if (type === 'meat') {
-            gameState.meat += 1;
-        }
-        updateUI();
-    }
+function gameLoop() {
+let moved = false;
+// 配合 3D 視角做稍微的移動補償
+if (keysPressed['w'] || keysPressed['arrowup']) { gameState.playerY -= gameState.speed * 0.9; moved = true; }
+if (keysPressed['s'] || keysPressed['arrowdown']) { gameState.playerY += gameState.speed * 0.9; moved = true; }
+if (keysPressed['a'] || keysPressed['arrowleft']) { gameState.playerX -= gameState.speed; moved = true; }
+if (keysPressed['d'] || keysPressed['arrowright']) { gameState.playerX += gameState.speed; moved = true; }
 
-    // 生成新客人需求
-    function generateCustomer() {
-        const types = ['wood', 'meat'];
-        currentDemand.type = types[Math.floor(Math.random() * types.length)];
-        currentDemand.amount = Math.floor(Math.random() * 5) + 2; // 2~6個
-        
-        let typeName = currentDemand.type === 'wood' ? '🪵 木材' : '🥩 熊肉';
-        currentDemand.reward = currentDemand.amount * (currentDemand.type === 'wood' ? 5 : 8); // 熊肉比較貴
-        
-        document.getElementById('demand-text').innerText = `我要 ${currentDemand.amount} 個${typeName} (付 $${currentDemand.reward})`;
-        document.getElementById('customer-icon').innerText = customerIcons[Math.floor(Math.random() * customerIcons.length)];
-        
-        updateUI();
-    }
+if (gameState.playerX < 0) gameState.playerX = 0;
+if (gameState.playerX > 640) gameState.playerX = 640;
+if (gameState.playerY < 0) gameState.playerY = 0;
+if (gameState.playerY > 420) gameState.playerY = 420;
 
-    // 賣出東西
-    function sellItems() {
-        if (currentDemand.type === 'wood' && gameState.wood >= currentDemand.amount) {
-            gameState.wood -= currentDemand.amount;
-            gameState.money += currentDemand.reward;
-            generateCustomer();
-        } else if (currentDemand.type === 'meat' && gameState.meat >= currentDemand.amount) {
-            gameState.meat -= currentDemand.amount;
-            gameState.money += currentDemand.reward;
-            generateCustomer();
-        }
-    }
+if (moved) {
+player.style.left = gameState.playerX + 'px';
+player.style.top = gameState.playerY + 'px';
 
-    // 升級房子
-    function upgradeHouse() {
-        let currentCost = houseStages[gameState.houseLevel - 1].cost;
-        if (gameState.money >= currentCost && gameState.houseLevel < houseStages.length) {
-            gameState.money -= currentCost;
-            gameState.houseLevel += 1;
-            alert("🎉 恭喜！房子升級了！");
-            updateUI();
-        }
-    }
+// 移動時主角微微前傾的 3D 動態
+player.style.transform = `translateZ(15px) rotateX(-10deg)`;
+checkCollisions();
+} else {
+player.style.transform = `translateZ(15px) rotateX(0deg)`;
+}
+requestAnimationFrame(gameLoop);
+}
 
-    // 初始化遊戲
-    generateCustomer();
+function isColliding(x1, y1, x2, y2, range = 55) {
+return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)) < range;
+}
+
+let canInteract = true;
+
+function checkCollisions() {
+if (!canInteract) return;
+let currentAxe = axeStages[Math.min(gameState.axeLevel - 1, axeStages.length - 1)];
+
+// 1. 砍立體樹 (560, 60)
+if (isColliding(gameState.playerX, gameState.playerY, 560, 60)) {
+gameState.wood += currentAxe.power;
+animateAxe();
+trigger3DEffect(document.getElementById('tree'));
+triggerCooldown(150);
+}
+// 2. 打立體北極熊 (560, 320)
+if (isColliding(gameState.playerX, gameState.playerY, 560, 320)) {
+gameState.meat += currentAxe.power;
+animateAxe();
+trigger3DEffect(document.getElementById('bear'));
+triggerCooldown(150);
+}
+// 3. 升級斧頭 (320, 40)
+if (isColliding(gameState.playerX, gameState.playerY, 320, 40)) {
+if (gameState.axeLevel < axeStages.length) {
+let cost = axeStages[gameState.axeLevel - 1].cost;
+if (gameState.money >= cost) {
+gameState.money -= cost;
+gameState.axeLevel++;
+triggerCooldown(600);
+alert(`🪓 斧頭升級為【${axeStages[gameState.axeLevel-1].name}】！`);
+}
+}
+}
+// 4. 交易 (50, 340)
+if (isColliding(gameState.playerX, gameState.playerY, 50, 340)) {
+if (currentDemand.type === 'wood' && gameState.wood >= currentDemand.amount) {
+gameState.wood -= currentDemand.amount;
+gameState.money += currentDemand.reward;
+generateCustomer();
+triggerCooldown(400);
+} else if (currentDemand.type === 'meat' && gameState.meat >= currentDemand.amount) {
+gameState.meat -= currentDemand.amount;
+gameState.money += currentDemand.reward;
+generateCustomer();
+triggerCooldown(400);
+}
+}
+// 5. 升級房子 (50, 40)
+if (isColliding(gameState.playerX, gameState.playerY, 50, 40)) {
+if (gameState.houseLevel < houseStages.length) {
+let cost = houseStages[gameState.houseLevel - 1].cost;
+if (gameState.money >= cost) {
+gameState.money -= cost;
+gameState.houseLevel++;
+triggerCooldown(600);
+alert(`🎉 房屋升級為：${houseStages[gameState.houseLevel-1].name}！`);
+}
+}
+}
+updateUI();
+}
+
+function animateAxe() {
+axeIcon.classList.add('swing');
+setTimeout(() => { axeIcon.classList.remove('swing'); }, 80);
+}
+
+// 受擊時物件會產生 3D 後仰物理晃動
+function trigger3DEffect(el) {
+el.style.transform = "rotateX(20deg) scale(0.9)";
+setTimeout(() => { el.style.transform = ""; }, 150);
+}
+
+function triggerCooldown(ms) {
+canInteract = false;
+setTimeout(() => { canInteract = true; }, ms);
+}
+
+function generateCustomer() {
+const types = ['wood', 'meat'];
+currentDemand.type = types[Math.floor(Math.random() * types.length)];
+currentDemand.amount = Math.floor(Math.random() * 5) + 3;
+
+let typeName = currentDemand.type === 'wood' ? '🪵' : '🥩';
+currentDemand.reward = currentDemand.amount * (currentDemand.type === 'wood' ? 6 : 10);
+
+let custDiv = document.getElementById('customer');
+custDiv.firstChild.textContent = customerIcons[Math.floor(Math.random() * customerIcons.length)];
+document.getElementById('customer-tip').innerText = `要 ${currentDemand.amount}個${typeName} ($${currentDemand.reward})`;
+}
+
+function updateUI() {
+document.getElementById('money').innerText = gameState.money;
+document.getElementById('wood').innerText = gameState.wood;
+document.getElementById('meat').innerText = gameState.meat;
+
+let currentAxe = axeStages[Math.min(gameState.axeLevel - 1, axeStages.length - 1)];
+document.getElementById('axe-efficiency').innerText = `+${currentAxe.power}`;
+
+let forgeTip = document.getElementById('forge-tip');
+forgeTip.innerText = gameState.axeLevel >= axeStages.length ? "已滿級！" : `升級斧頭: $${currentAxe.cost}`;
+
+let houseDiv = document.getElementById('house');
+houseDiv.firstChild.textContent = houseStages[gameState.houseLevel - 1].icon;
+let houseTip = document.getElementById('house-tip');
+houseTip.innerText = gameState.houseLevel >= houseStages.length ? "已滿級！" : `升級房子: $${houseStages[gameState.houseLevel - 1].cost}`;
+}
+
+generateCustomer();
+updateUI();
+gameLoop();
 </script>
 
 </body>
 </html>
+
