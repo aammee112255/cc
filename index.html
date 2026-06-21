@@ -4,393 +4,449 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>寒霜啟示錄 - 偽3D立體極速版</title>
+<title>寒霜啟示錄 - 真正3D幾何與鏡頭跟隨版</title>
 <style>
 body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background: #cbdcf0;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
 margin: 0;
+padding: 0;
 overflow: hidden;
-perspective: 1000px; /* 啟動全景 3D 視角 */
-}
-#game-container {
-width: 700px;
-background: #ffffff;
-border-radius: 15px;
-box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-overflow: hidden;
-border: 4px solid #99c2ed;
+background-color: #101725;
+font-family: 'Segoe UI', Arial, sans-serif;
 user-select: none;
 }
-.header {
-background: #2b5c8f;
-color: white;
-padding: 12px;
-text-align: center;
-font-size: 18px;
-font-weight: bold;
+#canvas-container {
+width: 100vw;
+height: 100vh;
+display: block;
 }
-.dashboard {
-display: flex;
-justify-content: space-around;
-background: #f0f7ff;
-padding: 10px;
-border-bottom: 2px solid #b3d7ff;
-font-weight: bold;
-font-size: 16px;
-z-index: 20;
-position: relative;
-}
-/* 3D 遊戲舞台 */
-#view-wrapper {
-width: 700px;
-height: 480px;
-background: #eef5fc;
-overflow: hidden;
-position: relative;
-}
-#map {
-width: 700px;
-height: 480px;
+/* 廣告風格頂部 UI */
+.ui-container {
 position: absolute;
-transform: rotateX(30deg) rotateY(0deg); /* 傾斜地圖製造立體感 */
-transform-style: preserve-3d;
-background-image: radial-gradient(#d3e5f7 20%, transparent 20%);
-background-size: 30px 30px;
-}
-/* 基礎 3D 物件 */
-.game-obj-3d {
-position: absolute;
-width: 60px;
-height: 60px;
-transform-style: preserve-3d;
+top: 25px;
+right: 25px;
 display: flex;
-justify-content: center;
+flex-direction: column;
+gap: 10px;
+z-index: 100;
+}
+.ui-box {
+background: rgba(15, 23, 42, 0.65);
+backdrop-filter: blur(8px);
+border: 2px solid rgba(255, 255, 255, 0.25);
+border-radius: 30px;
+padding: 8px 20px;
+display: flex;
 align-items: center;
-}
-
-/* --- 立體樹構造 --- */
-.3d-tree {
-transform: translateZ(0px);
-}
-.tree-layer {
-position: absolute;
-font-size: 55px;
-text-shadow: 0 5px 10px rgba(0,0,0,0.15);
-}
-/* 利用 Z 軸堆疊出立體厚度 */
-.tl-1 { transform: translateZ(0px) scale(1); }
-.tl-2 { transform: translateZ(15px) scale(0.85); color: #2e6930; }
-.tl-3 { transform: translateZ(30px) scale(0.7); color: #3d8c40; }
-
-/* --- 立體北極熊構造 --- */
-.3d-bear {
-animation: bearWobble 2s infinite ease-in-out;
-}
-.bear-layer {
-position: absolute;
-font-size: 55px;
-}
-.bl-shadow { transform: translateZ(0px) scale(1); filter: brightness(0) opacity(0.15); blur: 2px; top: 5px; }
-.bl-body { transform: translateZ(10px); }
-.bl-head { transform: translateZ(25px) scale(0.9); }
-
-/* 浮空提示文字 */
-.bubble {
-position: absolute;
-background: rgba(0,0,0,0.75);
+justify-content: space-between;
+min-width: 110px;
 color: white;
-padding: 4px 8px;
-border-radius: 5px;
-font-size: 11px;
-white-space: nowrap;
-transform: rotateX(-30deg) translateZ(50px); /* 讓文字面板立起來面向玩家 */
-top: -40px;
-pointer-events: none;
+font-weight: bold;
+font-size: 20px;
+box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
+.icon-cash { width: 24px; height: 14px; background: #22c55e; border: 2px solid white; border-radius: 3px; margin-right: 10px;}
+.icon-wood { width: 22px; height: 14px; background: #b45309; border-radius: 4px; margin-right: 10px;}
 
-/* 主角與斧頭 */
-#player {
-transition: all 0.05s linear;
-transform-style: preserve-3d;
-}
-.player-body {
-font-size: 45px;
-transform: translateZ(15px);
-}
-.axe-hand {
+.instruction {
 position: absolute;
-font-size: 24px;
-right: -15px;
-top: -5px;
-transform: translateZ(20px) rotate(0deg);
-transition: transform 0.1s;
-}
-.swing {
-transform: translateZ(20px) rotate(-70deg) !important;
-}
-
-/* 靜態普通建築 */
-.flat-style {
-font-size: 60px;
-transform: translateZ(10px);
-}
-
-@keyframes bearWobble {
-0%, 100% { transform: rotateZ(-5deg); }
-50% { transform: rotateZ(5deg); }
-}
-
-.control-tip {
-background: #333;
-color: #fff;
-text-align: center;
-padding: 8px;
-font-size: 13px;
-position: relative;
-z-index: 20;
+bottom: 30px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(15, 23, 42, 0.85);
+color: #93c5fd;
+padding: 12px 30px;
+border-radius: 40px;
+font-size: 16px;
+font-weight: bold;
+letter-spacing: 1px;
+pointer-events: none;
+box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+border: 1px solid #334155;
+white-space: nowrap;
+z-index: 100;
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-<div id="game-container">
-<div class="header">❄️ 寒霜啟示錄 - 3D立體視覺版 ❄️</div>
-
-<div class="dashboard">
-<div>💰 金幣: $<span id="money">0</span></div>
-<div>🪵 木材: <span id="wood">0</span></div>
-<div>🥩 熊肉: <span id="meat">0</span></div>
-<div>🪓 效率: <span id="axe-efficiency">每擊 +1</span></div>
+<div class="ui-container">
+<div class="ui-box"><div class="icon-cash"></div>$<span id="val-money">0</span></div>
+<div class="ui-box"><div class="icon-wood"></div><span id="val-wood">0 / 15</span></div>
 </div>
 
-<div id="view-wrapper">
-<div id="map">
-
-<div id="house" class="game-obj-3d flat-style" style="left: 50px; top: 40px;">
-🏚️
-<div id="house-tip" class="bubble">升級需 $50</div>
-</div>
-
-<div id="forge" class="game-obj-3d flat-style" style="left: 320px; top: 40px;">
-⚒️
-<div id="forge-tip" class="bubble">升級斧頭: $30</div>
-</div>
-
-<div id="customer" class="game-obj-3d flat-style" style="left: 50px; top: 340px;">
-🧍
-<div id="customer-tip" class="bubble">載入中...</div>
-</div>
-
-<div id="tree" class="game-obj-3d 3d-tree" style="left: 560px; top: 60px;">
-<div class="tree-layer tl-1">🌲</div>
-<div class="tree-layer tl-2">🌲</div>
-<div class="tree-layer tl-3">🌲</div>
-<div class="bubble">碰我砍樹</div>
-</div>
-
-<div id="bear" class="game-obj-3d 3d-bear" style="left: 560px; top: 320px;">
-<div class="bear-layer bl-shadow">🐻‍❄️</div>
-<div class="bear-layer bl-body">🐻‍❄️</div>
-<div class="bear-layer bl-head">🐻‍❄️</div>
-<div class="bubble">碰我打熊</div>
-</div>
-
-<div id="player" class="game-obj-3d" style="left: 320px; top: 220px;">
-<div class="player-body">🕴️</div>
-<span id="axe-icon" class="axe-hand">🪓</span>
-</div>
-
-</div>
-</div>
-
-<div class="control-tip">操作：按 <b>WASD</b> 移動。地圖加入了立體傾斜、樹木和北極熊皆升級為多層次 3D 模型！</div>
-</div>
+<div class="instruction">控制：長按 <b>W A S D</b> 或方向鍵移動，鏡頭與空間會實時跟隨你！</div>
+<div id="canvas-container"></div>
 
 <script>
-// 遊戲數據與邏輯 (延續上一版本並完美適應3D坐標)
+// --- 基礎 3D 場景設定 ---
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(#eff6ff); // 雪地淺藍底色
+scene.fog = new THREE.FogExp2(#eff6ff, 0.015);
+
+// 攝影機：採用透視相機，營造前後空間感
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+container.appendChild(renderer.domElement);
+
+// --- 光影系統 ---
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(40, 60, 20);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width = 2048;
+dirLight.shadow.mapSize.height = 2048;
+dirLight.shadow.camera.near = 0.5;
+dirLight.shadow.camera.far = 200;
+const d = 50;
+dirLight.shadow.camera.left = -d;
+dirLight.shadow.camera.right = d;
+dirLight.shadow.camera.top = d;
+dirLight.shadow.camera.bottom = -d;
+scene.add(dirLight);
+
+// --- 遊戲核心數據 ---
 let gameState = {
 money: 0,
 wood: 0,
-meat: 0,
-houseLevel: 1,
-axeLevel: 1,
-playerX: 320,
-playerY: 220,
-speed: 12
+maxWood: 15,
+axePower: 1,
+speed: 0.25,
+pX: 0,
+pZ: 0
 };
 
-const axeStages = [
-{ lvl: 1, name: "石製手斧", cost: 30, power: 1 },
-{ lvl: 2, name: "鐵製伐木斧", cost: 100, power: 2 },
-{ lvl: 3, name: "鋼製雙面斧", cost: 250, power: 4 },
-{ lvl: 4, name: "黃金開山神斧", cost: 600, power: 8 },
-{ lvl: 5, name: "極光終極神斧", cost: 0, power: 15 }
-];
+// --- 實體材質庫 ---
+const snowMat = new THREE.MeshLambertMaterial({ color: #e2eeff });
+const roadMat = new THREE.MeshLambertMaterial({ color: #e2955d }); // 廣告橘色道路
+const woodMat = new THREE.MeshLambertMaterial({ color: #d97706 });
+const leafMat = new THREE.MeshLambertMaterial({ color: #7cb3f5 });
+const leafTopMat = new THREE.MeshLambertMaterial({ color: #bfe3ff });
+const bearMat = new THREE.MeshLambertMaterial({ color: #ffffff });
+const cashMat = new THREE.MeshLambertMaterial({ color: #4ade80 });
+const tableMat = new THREE.MeshLambertMaterial({ color: #b45309 });
+const padMat = new THREE.MeshLambertMaterial({ color: #1e293b });
 
-const houseStages = [
-{ lvl: 1, name: "破爛小木屋", icon: "🏚️", cost: 50 },
-{ lvl: 2, name: "溫馨磚瓦房", icon: "🏡", cost: 150 },
-{ lvl: 3, name: "高級雙層別墅", icon: "🏠", cost: 400 },
-{ lvl: 4, name: "豪華防寒城堡", icon: "🏰", cost: 0 }
-];
+// --- 建立大地與廣告跑道 ---
+const floorGeo = new THREE.PlaneGeometry(300, 300);
+const floor = new THREE.Mesh(floorGeo, snowMat);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
 
-let currentDemand = { type: 'wood', amount: 3, reward: 15 };
-const customerIcons = ["🧍", "🏃", "🧔", "👩", "🤠"];
+const roadGeo = new THREE.PlaneGeometry(300, 8);
+const road = new THREE.Mesh(roadGeo, roadMat);
+road.rotation.x = -Math.PI / 2;
+road.position.y = 0.01; // 微高於雪地防止閃爍
+road.position.z = 0;
+road.receiveShadow = true;
+scene.add(road);
 
-const player = document.getElementById('player');
-const axeIcon = document.getElementById('axe-icon');
-let keysPressed = {};
+// --- 3D 幾何模型創建函數 ---
 
-window.addEventListener('keydown', (e) => { keysPressed[e.key.toLowerCase()] = true; });
-window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
+// 1. 幾何立體針葉樹
+function create3DTree(x, z) {
+const treeGroup = new THREE.Group();
+// 樹幹
+const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 2, 8);
+const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshLambertMaterial({color: #78350f}));
+trunk.position.y = 1;
+trunk.castShadow = true;
+treeGroup.add(trunk);
+// 三層幾何圓錐葉子
+const c1 = new THREE.Mesh(new THREE.ConeGeometry(2.5, 3, 5), leafMat);
+c1.position.y = 3; c1.castShadow = true; treeGroup.add(c1);
+const c2 = new THREE.Mesh(new THREE.ConeGeometry(2.0, 2.5, 5), leafMat);
+c2.position.y = 4.5; c2.castShadow = true; treeGroup.add(c2);
+const c3 = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2, 5), leafTopMat);
+c3.position.y = 6; c3.castShadow = true; treeGroup.add(c3);
 
-function gameLoop() {
+treeGroup.position.set(x, 0, z);
+scene.add(treeGroup);
+return { mesh: treeGroup, x: x, z: z, type: 'tree' };
+}
+
+// 2. 幾何立體方塊北極熊
+function create3DBear(x, z) {
+const bearGroup = new THREE.Group();
+// 身體
+const body = new THREE.Mesh(new THREE.BoxGeometry(2, 1.4, 3), bearMat);
+body.position.y = 1.1; body.castShadow = true; bearGroup.add(body);
+// 頭部
+const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.1, 1.2), bearMat);
+head.position.set(0, 1.9, 1.4); head.castShadow = true; bearGroup.add(head);
+// 鼻子
+const snout = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.4), new THREE.MeshLambertMaterial({color: #e2e8f0}));
+snout.position.set(0, 1.8, 2.1); bearGroup.add(snout);
+// 四條腿
+for(let i=0; i<4; i++) {
+const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.5), bearMat);
+leg.position.set(i%2===0?0.7:-0.7, 0.3, i<2?1:-1);
+leg.castShadow = true; bearGroup.add(leg);
+}
+bearGroup.position.set(x, 0, z);
+scene.add(bearGroup);
+return { mesh: bearGroup, x: x, z: z, type: 'bear', animTime: Math.random()*10 };
+}
+
+// 場景物件陣列
+let interactables = [];
+// 初始化放置樹木與北極熊群
+interactables.push(create3DTree(-10, -12));
+interactables.push(create3DTree(-4, -15));
+interactables.push(create3DTree(6, -13));
+interactables.push(create3DTree(14, -16));
+
+interactables.push(create3DBear(-12, -5));
+interactables.push(create3DBear(12, -6));
+
+// 3. 卸貨木桌
+const table = new THREE.Mesh(new THREE.BoxGeometry(4, 1.2, 2), tableMat);
+table.position.set(-5, 0.6, 4);
+table.castShadow = true; table.receiveShadow = true;
+scene.add(table);
+
+// 4. 工具升級地格
+const upgradePad = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 2.5), padMat);
+upgradePad.position.set(6, 0.05, 4);
+upgradePad.receiveShadow = true;
+scene.add(upgradePad);
+
+// --- 主角建構 (純幾何藍色防寒服小人) ---
+const playerGroup = new THREE.Group();
+const pBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.6, 0.9), new THREE.MeshLambertMaterial({color: #0284c7}));
+pBody.position.y = 1; pBody.castShadow = true; playerGroup.add(pBody);
+const pHood = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshLambertMaterial({color: #ffffff}));
+pHood.position.y = 2; pHood.castShadow = true; playerGroup.add(pHood);
+const pFace = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), new THREE.MeshLambertMaterial({color: #fed7aa}));
+pFace.position.set(0, 2, 0.2); playerGroup.add(pFace);
+
+// 主角手持武器 (3D 鶴嘴鋤)
+const toolGroup = new THREE.Group();
+const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5), new THREE.MeshLambertMaterial({color: #78350f}));
+shaft.rotation.x = Math.PI/2; toolGroup.add(shaft);
+const headGeo = new THREE.CylinderGeometry(0.06, 0.02, 0.8);
+const tHead = new THREE.Mesh(headGeo, new THREE.MeshLambertMaterial({color: #94a3b8}));
+tHead.position.z = 0.6; tHead.rotation.z = Math.PI/2; toolGroup.add(tHead);
+toolGroup.position.set(0.8, 1, 0.3);
+playerGroup.add(toolGroup);
+
+// 背包容器：用來裝疊高的 3D 木頭
+const backpackGroup = new THREE.Group();
+backpackGroup.position.set(0, 0.6, -0.6); // 位於主角背後
+playerGroup.add(backpackGroup);
+
+playerGroup.position.set(0, 0, 8); // 起始位置
+scene.add(playerGroup);
+
+// --- 實體物件動態陣列 ---
+let backpackLogs = [];
+let sceneCashes = [];
+let tableLogCount = 0;
+
+// --- 鍵盤監聽 ---
+let keys = {};
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// --- 工具計時器 ---
+let harvestTimer = 0;
+let unloadTimer = 0;
+let isMining = false;
+
+// --- 核心渲染與邏輯動態循環 ---
+function animate() {
+requestAnimationFrame(animate);
+
+// 1. 玩家移動操作
 let moved = false;
-// 配合 3D 視角做稍微的移動補償
-if (keysPressed['w'] || keysPressed['arrowup']) { gameState.playerY -= gameState.speed * 0.9; moved = true; }
-if (keysPressed['s'] || keysPressed['arrowdown']) { gameState.playerY += gameState.speed * 0.9; moved = true; }
-if (keysPressed['a'] || keysPressed['arrowleft']) { gameState.playerX -= gameState.speed; moved = true; }
-if (keysPressed['d'] || keysPressed['arrowright']) { gameState.playerX += gameState.speed; moved = true; }
+let moveX = 0, moveZ = 0;
 
-if (gameState.playerX < 0) gameState.playerX = 0;
-if (gameState.playerX > 640) gameState.playerX = 640;
-if (gameState.playerY < 0) gameState.playerY = 0;
-if (gameState.playerY > 420) gameState.playerY = 420;
+if (keys['w'] || keys['arrowup']) { moveZ -= 1; moved = true; }
+if (keys['s'] || keys['arrowdown']) { moveZ += 1; moved = true; }
+if (keys['a'] || keys['arrowleft']) { moveX -= 1; moved = true; }
+if (keys['d'] || keys['arrowright']) { moveX += 1; moved = true; }
 
 if (moved) {
-player.style.left = gameState.playerX + 'px';
-player.style.top = gameState.playerY + 'px';
+// 正規化移動向量，防斜走加速
+const length = Math.sqrt(moveX * moveX + moveZ * moveZ);
+gameState.pX += (moveX / length) * gameState.speed;
+gameState.pZ += (moveZ / length) * gameState.speed;
 
-// 移動時主角微微前傾的 3D 動態
-player.style.transform = `translateZ(15px) rotateX(-10deg)`;
-checkCollisions();
+playerGroup.position.set(gameState.pX, 0, gameState.pZ);
+
+// 讓角色面向移動的方向
+playerGroup.rotation.y = Math.atan2(moveX, moveZ);
+
+// 走路時身體微微搖晃
+pBody.rotation.z = Math.sin(Date.now() * 0.01) * 0.1;
 } else {
-player.style.transform = `translateZ(15px) rotateX(0deg)`;
-}
-requestAnimationFrame(gameLoop);
+pBody.rotation.z = 0;
 }
 
-function isColliding(x1, y1, x2, y2, range = 55) {
-return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)) < range;
+// CRITICAL: 空間與鏡頭即時跟著人移動
+camera.position.set(playerGroup.position.x, playerGroup.position.y + 16, playerGroup.position.z + 16);
+camera.lookAt(playerGroup.position.x, playerGroup.position.y + 1, playerGroup.position.z);
+
+// 北極熊自主呼吸晃動
+interactables.forEach(obj => {
+if(obj.type === 'bear') {
+obj.animTime += 0.03;
+obj.mesh.rotation.y = Math.sin(obj.animTime * 0.5) * 0.3;
+obj.mesh.position.y = Math.abs(Math.sin(obj.animTime)) * 0.15;
+}
+});
+
+// 2. 碰撞與互動偵測
+isMining = false;
+interactables.forEach(obj => {
+let dist = Math.sqrt(Math.pow(playerGroup.position.x - obj.x, 2) + Math.pow(playerGroup.position.z - obj.z, 2));
+if (dist < 2.5) {
+isMining = true;
+// 觸發揮動斧頭工具動畫
+toolGroup.rotation.x = Math.sin(Date.now() * 0.02) * 0.8;
+
+if (Date.now() - harvestTimer > 300) {
+if (gameState.wood < gameState.maxWood) {
+gameState.wood += gameState.axePower;
+if (gameState.wood > gameState.maxWood) gameState.wood = gameState.maxWood;
+
+// 受擊幾何晃動反饋
+obj.mesh.scale.set(1.2, 0.8, 1.2);
+setTimeout(() => obj.mesh.scale.set(1,1,1), 100);
+
+updateBackpack3D();
+}
+harvestTimer = Date.now();
+}
+}
+});
+
+if(!isMining) {
+toolGroup.rotation.x = 0; // 靜止時回復原位
 }
 
-let canInteract = true;
+// 3. 走近木桌自動卸貨 (桌子坐標: -5, 4)
+let distToTable = Math.sqrt(Math.pow(playerGroup.position.x - (-5), 2) + Math.pow(playerGroup.position.z - 4, 2));
+if (distToTable < 2.5 && gameState.wood > 0) {
+if (Date.now() - unloadTimer > 150) {
+gameState.wood--;
+updateBackpack3D();
 
-function checkCollisions() {
-if (!canInteract) return;
-let currentAxe = axeStages[Math.min(gameState.axeLevel - 1, axeStages.length - 1)];
+// 在桌面上堆疊小型 3D 木材
+const tableLog = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.8, 8), woodMat);
+tableLog.rotation.z = Math.PI / 2;
+tableLog.position.set(-5 + (Math.random()*1.2 - 0.6), 1.3 + (tableLogCount * 0.12), 4 + (Math.random()*0.6 - 0.3));
+scene.add(tableLog);
+tableLogCount++;
 
-// 1. 砍立體樹 (560, 60)
-if (isColliding(gameState.playerX, gameState.playerY, 560, 60)) {
-gameState.wood += currentAxe.power;
-animateAxe();
-trigger3DEffect(document.getElementById('tree'));
-triggerCooldown(150);
-}
-// 2. 打立體北極熊 (560, 320)
-if (isColliding(gameState.playerX, gameState.playerY, 560, 320)) {
-gameState.meat += currentAxe.power;
-animateAxe();
-trigger3DEffect(document.getElementById('bear'));
-triggerCooldown(150);
-}
-// 3. 升級斧頭 (320, 40)
-if (isColliding(gameState.playerX, gameState.playerY, 320, 40)) {
-if (gameState.axeLevel < axeStages.length) {
-let cost = axeStages[gameState.axeLevel - 1].cost;
-if (gameState.money >= cost) {
-gameState.money -= cost;
-gameState.axeLevel++;
-triggerCooldown(600);
-alert(`🪓 斧頭升級為【${axeStages[gameState.axeLevel-1].name}】！`);
+// 廣告精髓：拋物線噴射 3D 現金方塊
+spawn3DCash();
+
+unloadTimer = Date.now();
+
+// 桌上積木太多時自動清理釋放內存
+if(tableLogCount > 20) {
+setTimeout(() => { scene.remove(tableLog); }, 1500);
 }
 }
-}
-// 4. 交易 (50, 340)
-if (isColliding(gameState.playerX, gameState.playerY, 50, 340)) {
-if (currentDemand.type === 'wood' && gameState.wood >= currentDemand.amount) {
-gameState.wood -= currentDemand.amount;
-gameState.money += currentDemand.reward;
-generateCustomer();
-triggerCooldown(400);
-} else if (currentDemand.type === 'meat' && gameState.meat >= currentDemand.amount) {
-gameState.meat -= currentDemand.amount;
-gameState.money += currentDemand.reward;
-generateCustomer();
-triggerCooldown(400);
-}
-}
-// 5. 升級房子 (50, 40)
-if (isColliding(gameState.playerX, gameState.playerY, 50, 40)) {
-if (gameState.houseLevel < houseStages.length) {
-let cost = houseStages[gameState.houseLevel - 1].cost;
-if (gameState.money >= cost) {
-gameState.money -= cost;
-gameState.houseLevel++;
-triggerCooldown(600);
-alert(`🎉 房屋升級為：${houseStages[gameState.houseLevel-1].name}！`);
-}
-}
-}
-updateUI();
 }
 
-function animateAxe() {
-axeIcon.classList.add('swing');
-setTimeout(() => { axeIcon.classList.remove('swing'); }, 80);
+// 4. 地面 3D 現金物理吸附與收集
+for (let i = sceneCashes.length - 1; i >= 0; i--) {
+let cash = sceneCashes[i];
+
+// 如果現金還在噴射動畫中
+if(cash.flyTicks > 0) {
+cash.mesh.position.x += cash.vX;
+cash.mesh.position.y += cash.vY;
+cash.mesh.position.z += cash.vZ;
+cash.vY -= 0.015; // 模擬重力
+if(cash.mesh.position.y < 0.15) { cash.mesh.position.y = 0.15; cash.flyTicks = 0; }
+cash.flyTicks--;
+} else {
+// 落地後，檢測玩家是否走近吸取
+let distToCash = Math.sqrt(Math.pow(playerGroup.position.x - cash.mesh.position.x, 2) + Math.pow(playerGroup.position.z - cash.mesh.position.z, 2));
+if(distToCash < 2.0) {
+gameState.money += 15;
+document.getElementById('val-money').innerText = gameState.money;
+scene.remove(cash.mesh);
+sceneCashes.splice(i, 1);
+}
+}
 }
 
-// 受擊時物件會產生 3D 後仰物理晃動
-function trigger3DEffect(el) {
-el.style.transform = "rotateX(20deg) scale(0.9)";
-setTimeout(() => { el.style.transform = ""; }, 150);
+// 5. 工具升級地格踩踏檢測 (格子坐標: 6, 4)
+let distToPad = Math.sqrt(Math.pow(playerGroup.position.x - 6, 2) + Math.pow(playerGroup.position.z - 4, 2));
+if (distToPad < 1.8) {
+if (gameState.money >= 30) {
+gameState.money -= 30;
+gameState.axePower += 1;
+document.getElementById('val-money').innerText = gameState.money;
+
+// 地格閃爍綠色視覺回饋
+upgradePad.material = new THREE.MeshLambertMaterial({color: #22c55e});
+setTimeout(() => upgradePad.material = padMat, 300);
+playerGroup.position.z += 1.5; // 略微彈開玩家防止連續觸發
+gameState.pZ += 1.5;
+}
 }
 
-function triggerCooldown(ms) {
-canInteract = false;
-setTimeout(() => { canInteract = true; }, ms);
+renderer.render(scene, camera);
 }
 
-function generateCustomer() {
-const types = ['wood', 'meat'];
-currentDemand.type = types[Math.floor(Math.random() * types.length)];
-currentDemand.amount = Math.floor(Math.random() * 5) + 3;
+// --- 核心演算法：在背上實體堆疊 3D 圓柱木材 ---
+function updateBackpack3D() {
+// 先清除之前的背部木頭模型
+backpackLogs.forEach(log => backpackGroup.remove(log));
+backpackLogs = [];
 
-let typeName = currentDemand.type === 'wood' ? '🪵' : '🥩';
-currentDemand.reward = currentDemand.amount * (currentDemand.type === 'wood' ? 6 : 10);
-
-let custDiv = document.getElementById('customer');
-custDiv.firstChild.textContent = customerIcons[Math.floor(Math.random() * customerIcons.length)];
-document.getElementById('customer-tip').innerText = `要 ${currentDemand.amount}個${typeName} ($${currentDemand.reward})`;
+// 重新依據當前數量向上累積堆疊
+for (let i = 0; i < gameState.wood; i++) {
+const logGeo = new THREE.CylinderGeometry(0.16, 0.16, 1.1, 8);
+const logMesh = new THREE.Mesh(logGeo, woodMat);
+logMesh.rotation.z = Math.PI / 2; // 橫放
+logMesh.position.y = i * 0.22; // 層層往上疊高
+logMesh.castShadow = true;
+backpackGroup.add(logMesh);
+backpackLogs.push(logMesh);
 }
 
-function updateUI() {
-document.getElementById('money').innerText = gameState.money;
-document.getElementById('wood').innerText = gameState.wood;
-document.getElementById('meat').innerText = gameState.meat;
-
-let currentAxe = axeStages[Math.min(gameState.axeLevel - 1, axeStages.length - 1)];
-document.getElementById('axe-efficiency').innerText = `+${currentAxe.power}`;
-
-let forgeTip = document.getElementById('forge-tip');
-forgeTip.innerText = gameState.axeLevel >= axeStages.length ? "已滿級！" : `升級斧頭: $${currentAxe.cost}`;
-
-let houseDiv = document.getElementById('house');
-houseDiv.firstChild.textContent = houseStages[gameState.houseLevel - 1].icon;
-let houseTip = document.getElementById('house-tip');
-houseTip.innerText = gameState.houseLevel >= houseStages.length ? "已滿級！" : `升級房子: $${houseStages[gameState.houseLevel - 1].cost}`;
+document.getElementById('val-wood').innerText = `${gameState.wood} / ${gameState.maxWood}`;
 }
 
-generateCustomer();
-updateUI();
-gameLoop();
+// --- 核心演算法：拋物線噴發立體美鈔方塊 ---
+function spawn3DCash() {
+const cashGeo = new THREE.BoxGeometry(0.7, 0.15, 0.4);
+const cashMesh = new THREE.Mesh(cashGeo, cashMat);
+cashMesh.position.set(-5, 1.2, 4);
+cashMesh.castShadow = true;
+scene.add(cashMesh);
+
+// 隨機賦予初速度向量，形成向四周噴散的唯美弧線
+sceneCashes.push({
+mesh: cashMesh,
+vX: (Math.random() * 0.15 - 0.05),
+vY: (Math.random() * 0.2 + 0.15),
+vZ: (Math.random() * 0.15 + 0.05),
+flyTicks: 40
+});
+}
+
+// 視窗大小自適應
+window.addEventListener('resize', () => {
+camera.aspect = window.innerWidth / window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// 啟動 3D 渲染主體
+animate();
 </script>
-
 </body>
 </html>
 
